@@ -1,0 +1,428 @@
+// ===========================================================================
+// 地圖產生器 (real-geography map generator) — 多旅程版
+// ---------------------------------------------------------------------------
+// 把 Natural Earth 50m 的真實國界海岸線，投影成棋盤用的 SVG 路徑，並依「真實
+// 經緯度」重新計算每一站的座標，寫回各 journey JSON。
+//
+//   輸入：scripts/_geodata/ne50m_countries.geojson  (下載自 Natural Earth)
+//   輸出（每條旅程一組）：
+//     journey1     → src/data/region-map.json       + 寫回 journey1.json
+//     journey2     → src/data/region-map2.json      + 寫回 journey2.json
+//     journey-jonah→ src/data/region-map-jonah.json + 寫回 journey-jonah.json
+//
+// 投影：等距圓柱投影 (equirectangular)，經度乘上 cos(中央緯度) 修正寬窄，
+//       再各自正規化到 0~100。棋盤容器的長寬比設為 aspect 即可避免變形。
+// 執行：node scripts/gen-map.mjs
+// ===========================================================================
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const GEO = join(__dirname, '_geodata', 'ne50m_countries.geojson')
+const DATA = join(__dirname, '..', 'src', 'data')
+
+const GEO_URL =
+  'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_0_countries.geojson'
+
+async function ensureGeoData() {
+  if (existsSync(GEO)) return
+  console.log('⬇️  找不到地理資料，正在下載 Natural Earth 50m 國界（約 3MB，僅第一次）...')
+  mkdirSync(dirname(GEO), { recursive: true })
+  const res = await fetch(GEO_URL)
+  if (!res.ok) throw new Error(`下載失敗 (HTTP ${res.status})：${GEO_URL}`)
+  const buf = Buffer.from(await res.arrayBuffer())
+  writeFileSync(GEO, buf)
+  console.log(`   已存到 ${GEO}（${(buf.length / 1024 / 1024).toFixed(2)} MB）`)
+}
+await ensureGeoData()
+
+const fc = JSON.parse(readFileSync(GEO, 'utf-8'))
+const r1 = (n) => Math.round(n * 10) / 10
+
+// --- Sutherland–Hodgman：把多邊形裁切到 [0,100]×[0,100] 方框（與投影無關，共用） ---
+const lerp = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]
+function clipEdge(pts, inside, isect) {
+  const out = []
+  for (let i = 0; i < pts.length; i++) {
+    const cur = pts[i]
+    const prev = pts[(i + pts.length - 1) % pts.length]
+    const cIn = inside(cur), pIn = inside(prev)
+    if (cIn) {
+      if (!pIn) out.push(isect(prev, cur))
+      out.push(cur)
+    } else if (pIn) {
+      out.push(isect(prev, cur))
+    }
+  }
+  return out
+}
+function clipToBox(pts) {
+  pts = clipEdge(pts, (p) => p[0] >= 0,   (a, b) => lerp(a, b, (0 - a[0]) / (b[0] - a[0])))
+  if (!pts.length) return pts
+  pts = clipEdge(pts, (p) => p[0] <= 100, (a, b) => lerp(a, b, (100 - a[0]) / (b[0] - a[0])))
+  if (!pts.length) return pts
+  pts = clipEdge(pts, (p) => p[1] >= 0,   (a, b) => lerp(a, b, (0 - a[1]) / (b[1] - a[1])))
+  if (!pts.length) return pts
+  pts = clipEdge(pts, (p) => p[1] <= 100, (a, b) => lerp(a, b, (100 - a[1]) / (b[1] - a[1])))
+  return pts
+}
+function decimate(pts, eps = 0.25) {
+  const out = []
+  for (const p of pts) {
+    const last = out[out.length - 1]
+    if (!last || Math.hypot(p[0] - last[0], p[1] - last[1]) >= eps) out.push(p)
+  }
+  return out
+}
+
+// 產生一個旅程的地圖：投影海岸線 + 寫回站點座標。
+function buildRegion(cfg) {
+  const { label, bounds, iso, cities, journeyFile, mapFile } = cfg
+  const { lonMin, lonMax, latMin, latMax } = bounds
+  const midLat = (latMin + latMax) / 2
+  const K = Math.cos((midLat * Math.PI) / 180) // 經度壓縮係數
+  const aspect = ((lonMax - lonMin) * K) / (latMax - latMin) // 棋盤寬/高
+  const project = (lon, lat) => [
+    ((lon - lonMin) / (lonMax - lonMin)) * 100,
+    ((latMax - lat) / (latMax - latMin)) * 100,
+  ]
+  const ringToPath = (ring) => {
+    let clipped = clipToBox(ring.map(([lon, lat]) => project(lon, lat)))
+    if (clipped.length < 3) return null
+    clipped = decimate(clipped)
+    if (clipped.length < 3) return null
+    return 'M' + clipped.map(([x, y]) => `${r1(x)},${r1(y)}`).join(' L') + ' Z'
+  }
+
+  const isoSet = new Set(iso)
+  const wanted = (props) => {
+    const codes = [props.ISO_A3, props.ADM0_A3, props.ISO_A3_EH, props.SOV_A3]
+    return codes.some((c) => isoSet.has(c))
+  }
+
+  const lands = []
+  for (const f of fc.features) {
+    if (!wanted(f.properties)) continue
+    const g = f.geometry
+    const polys = g.type === 'Polygon' ? [g.coordinates] : g.type === 'MultiPolygon' ? g.coordinates : []
+    for (const poly of polys) {
+      const d = ringToPath(poly[0]) // 只取外環
+      if (d) lands.push(d)
+    }
+  }
+
+  const cityMarks = Object.fromEntries(
+    Object.entries(cities).map(([id, { lat, lon }]) => {
+      const [x, y] = project(lon, lat)
+      return [id, { x: r1(x), y: r1(y), lat, lon }]
+    }),
+  )
+
+  // 地名標籤：由真實經緯度投影成棋盤座標，所以「賽普勒斯」之類一定落在對的位置。
+  const labelMarks = (cfg.labels || []).map((l) => {
+    const [x, y] = project(l.lon, l.lat)
+    return { t: l.t, x: r1(x), y: r1(y), kind: l.kind }
+  })
+
+  writeFileSync(
+    join(DATA, mapFile),
+    JSON.stringify(
+      {
+        _comment: 'Auto-generated by scripts/gen-map.mjs — do not edit by hand. Run: node scripts/gen-map.mjs',
+        projection: { lonMin, lonMax, latMin, latMax, midLat },
+        aspect: Math.round(aspect * 1000) / 1000,
+        lands,
+        cities: cityMarks,
+        labels: labelMarks,
+      },
+      null,
+      2,
+    ),
+  )
+
+  const journey = JSON.parse(readFileSync(join(DATA, journeyFile), 'utf-8'))
+  let patched = 0
+  for (const st of journey.stations) {
+    const c = cities[st.id]
+    if (!c) {
+      console.warn(`⚠️  ${journeyFile} 有一站沒對應到城市座標：${st.id}`)
+      continue
+    }
+    const [x, y] = project(c.lon, c.lat)
+    st.x = r1(x)
+    st.y = r1(y)
+    st.lat = c.lat
+    st.lon = c.lon
+    patched++
+  }
+  writeFileSync(join(DATA, journeyFile), JSON.stringify(journey, null, 2) + '\n')
+
+  console.log(
+    `✅ ${label}：國界 ${lands.length} 條、aspect ${Math.round(aspect * 1000) / 1000}、座標 ${patched}/${journey.stations.length} 站`,
+  )
+}
+
+// ===========================================================================
+// 第一次宣教旅程（東地中海一帶）—— 維持原本的範圍與城市，輸出不變。
+// ===========================================================================
+buildRegion({
+  label: '第一次旅程',
+  bounds: { lonMin: 29.0, lonMax: 38.2, latMin: 33.6, latMax: 39.2 },
+  iso: ['TUR', 'SYR', 'LBN', 'CYP', 'CYN'], // 含北賽普勒斯讓整座島完整
+  journeyFile: 'journey1.json',
+  mapFile: 'region-map.json',
+  labels: [
+    { t: '小亞細亞（今土耳其）', lat: 38.9, lon: 33.6, kind: 'region' },
+    { t: '敘利亞', lat: 35.4, lon: 37.7, kind: 'region' },
+    { t: '賽普勒斯', lat: 35.05, lon: 33.3, kind: 'island' },
+    { t: '居比路', lat: 34.6, lon: 33.3, kind: 'island-sub' },
+    { t: '地　中　海', lat: 34.0, lon: 33.9, kind: 'sea' },
+  ],
+  cities: {
+    antioch_start:    { lat: 36.20, lon: 36.16 },
+    seleucia:         { lat: 36.12, lon: 35.93 },
+    salamis:          { lat: 35.18, lon: 33.91 },
+    paphos:           { lat: 34.77, lon: 32.41 },
+    perga:            { lat: 36.96, lon: 30.85 },
+    pisidian_antioch: { lat: 38.31, lon: 31.19 },
+    iconium:          { lat: 37.87, lon: 32.49 },
+    lystra:           { lat: 37.58, lon: 32.45 },
+    derbe:            { lat: 37.35, lon: 33.28 },
+    return_strengthen:{ lat: 37.70, lon: 31.95 },
+    attalia:          { lat: 36.88, lon: 30.70 },
+    antioch_end:      { lat: 36.42, lon: 36.40 },
+    seacard_1:        { lat: 35.65, lon: 34.92 },
+    seacard_2:        { lat: 35.87, lon: 31.63 },
+    mountain_run:     { lat: 37.64, lon: 31.02 },
+    landcard_1:       { lat: 38.09, lon: 31.84 },
+    landcard_2:       { lat: 37.47, lon: 32.87 },
+    landcard_3:       { lat: 37.29, lon: 31.33 },
+    storm_challenge:  { lat: 36.76, lon: 32.13 },
+    seacard_3:        { lat: 36.65, lon: 33.55 },
+  },
+})
+
+// ===========================================================================
+// 第二次宣教旅程（東地中海 + 愛琴海 + 希臘/馬其頓）—— 框架更往西，含歐洲。
+// ===========================================================================
+buildRegion({
+  label: '第二次旅程',
+  bounds: { lonMin: 21.0, lonMax: 37.5, latMin: 31.5, latMax: 41.8 },
+  // 希臘、土耳其、敘利亞、黎巴嫩、賽普勒斯、以色列/巴勒斯坦、約旦、埃及、巴爾幹諸國（畫出愛琴海與希臘海岸線）
+  iso: ['GRC', 'TUR', 'SYR', 'LBN', 'CYP', 'CYN', 'ISR', 'PSE', 'JOR', 'EGY', 'BGR', 'MKD', 'ALB'],
+  journeyFile: 'journey2.json',
+  mapFile: 'region-map2.json',
+  labels: [
+    { t: '馬其頓', lat: 41.0, lon: 23.2, kind: 'region' },
+    { t: '亞該亞（希臘）', lat: 38.1, lon: 22.6, kind: 'region' },
+    { t: '小亞細亞', lat: 38.9, lon: 30.5, kind: 'region' },
+    { t: '敘利亞', lat: 35.8, lon: 36.6, kind: 'region' },
+    { t: '愛　琴　海', lat: 38.6, lon: 25.1, kind: 'sea' },
+    { t: '地　中　海', lat: 33.6, lon: 28.5, kind: 'sea' },
+  ],
+  cities: {
+    antioch2_start:     { lat: 36.20, lon: 36.16 }, // 敘利亞安提阿（出發）
+    cilicia_strengthen: { lat: 36.92, lon: 34.90 }, // 敘利亞與基利家（大數一帶，堅固教會）
+    cilician_gates:     { lat: 37.28, lon: 34.61 }, // 翻越托魯斯山（基利家門隘口，闖關站）
+    derbe2:             { lat: 37.35, lon: 33.28 }, // 特庇
+    lystra2:            { lat: 37.58, lon: 32.45 }, // 路司得（提摩太加入）
+    phrygia_galatia:    { lat: 38.85, lon: 29.20 }, // 弗呂家、加拉太（聖靈攔阻）
+    troas:              { lat: 39.78, lon: 26.16 }, // 特羅亞（馬其頓異象）
+    neapolis:           { lat: 40.94, lon: 24.41 }, // 尼亞波利（福音登陸歐洲的第一個港口）
+    philippi:           { lat: 41.01, lon: 24.29 }, // 腓立比（歐洲第一間教會）
+    amphipolis_chance:  { lat: 40.74, lon: 23.70 }, // 經過暗妃波里（機會卡，羅馬大道途中）
+    thessalonica:       { lat: 40.64, lon: 22.94 }, // 帖撒羅尼迦
+    berea:              { lat: 40.52, lon: 22.20 }, // 庇哩亞
+    aegean_fate:        { lat: 39.30, lon: 23.40 }, // 愛琴海航路（命運卡，海上途中站）
+    athens:             { lat: 37.98, lon: 23.73 }, // 雅典（亞略巴古）
+    corinth:            { lat: 37.91, lon: 22.88 }, // 哥林多（住一年半）
+    cenchreae:          { lat: 37.72, lon: 23.30 }, // 堅革哩（哥林多東邊外港，剪髮許願；稍偏移避免和哥林多重疊）
+    ephesus2:           { lat: 37.94, lon: 27.34 }, // 以弗所（短暫停留）
+    med_voyage:         { lat: 34.60, lon: 31.50 }, // 地中海長航（闖關站，海上）
+    caesarea2:          { lat: 32.50, lon: 34.89 }, // 該撒利亞（回程登岸）
+    antioch2_end:       { lat: 36.42, lon: 36.40 }, // 回到安提阿（旅程結束）
+  },
+})
+
+// ===========================================================================
+// 第三次宣教旅程（愛琴海兩岸 + 南下耶路撒冷）——以弗所三年是中心；
+// 回程沿岸南下：米利都 → 推羅 → 該撒利亞 → 耶路撒冷（框比第二次更往南）。
+// 以弗所時期的事件站（推喇奴/奇事/士基瓦/焚書/暴動）沿出城往北的路線展開
+// （同 journey1 把卡站擺在路段上的慣例——是「時期中的事件點」，不是假城市）。
+// ===========================================================================
+buildRegion({
+  label: '第三次旅程',
+  bounds: { lonMin: 21.5, lonMax: 37.5, latMin: 30.8, latMax: 42.0 },
+  iso: ['GRC', 'TUR', 'SYR', 'LBN', 'CYP', 'CYN', 'ISR', 'PSE', 'JOR', 'EGY', 'BGR', 'MKD', 'ALB'],
+  journeyFile: 'journey3.json',
+  mapFile: 'region-map3.json',
+  labels: [
+    { t: '馬其頓', lat: 41.4, lon: 23.4, kind: 'region' },
+    { t: '亞該亞（希臘）', lat: 38.4, lon: 21.9, kind: 'region' },
+    { t: '亞細亞（以弗所一帶）', lat: 39.2, lon: 29.6, kind: 'region' },
+    { t: '愛　琴　海', lat: 38.0, lon: 25.1, kind: 'sea' },
+    { t: '地　中　海', lat: 33.6, lon: 28.5, kind: 'sea' },
+    { t: '猶太地', lat: 31.3, lon: 34.6, kind: 'region' },
+  ],
+  cities: {
+    antioch3_start:   { lat: 36.20, lon: 36.16 }, // 敘利亞安提阿（出發）
+    galatia_phrygia3: { lat: 38.70, lon: 31.20 }, // 加拉太、弗呂家（堅固門徒，途中區域）
+    highland_road:    { lat: 38.75, lon: 29.30 }, // 經過上邊一帶（高原闖關站）
+    ephesus_disciples:{ lat: 37.94, lon: 27.34 }, // 以弗所（十二門徒受聖靈）
+    tyrannus_hall:    { lat: 38.30, lon: 27.05 }, // 推喇奴學房（以弗所時期事件點）
+    ephesus_chance:   { lat: 38.68, lon: 26.75 }, // 非常的奇事（機會卡）
+    sceva_sons:       { lat: 39.05, lon: 26.45 }, // 士基瓦七子
+    burn_books:       { lat: 39.42, lon: 26.10 }, // 焚燒邪書
+    demetrius_riot:   { lat: 39.80, lon: 25.70 }, // 底米丟暴動（命運卡）
+    macedonia3:       { lat: 40.80, lon: 24.60 }, // 走遍馬其頓（海路抵達）
+    greece_romans:    { lat: 37.91, lon: 22.88 }, // 希臘三個月（哥林多，寫羅馬書）
+    philippi_luke:    { lat: 41.01, lon: 24.29 }, // 回到腓立比（路加加入）
+    troas_eutychus:   { lat: 39.78, lon: 26.16 }, // 特羅亞（猶推古）
+    assos_walk:       { lat: 39.49, lon: 26.60 }, // 步行往亞朔（機會卡）
+    sea_dash:         { lat: 38.30, lon: 26.20 }, // 趕路的海程（闖關站，基阿/撒摩海域）
+    miletus_farewell: { lat: 37.53, lon: 27.28 }, // 米利都（以弗所長老道別）
+    tyre_kneel:       { lat: 33.27, lon: 35.20 }, // 推羅（岸邊跪禱）
+    caesarea_agabus:  { lat: 32.50, lon: 34.89 }, // 該撒利亞（亞迦布預言）
+    jerusalem_road3:  { lat: 32.10, lon: 35.05 }, // 上耶路撒冷的路（命運卡）
+    jerusalem3_end:   { lat: 31.78, lon: 35.23 }, // 耶路撒冷（終點）
+  },
+})
+
+// ===========================================================================
+// 出埃及記之旅（尼羅河三角洲 → 西奈半島）——行程站名出自聖經記載
+// （出 12:37、13:20、14:2、15:22–27、16:1、17:1、19:1）。紅海＝蘇伊士灣，
+// 過紅海段用 arriveBy:"sea" 畫成海路。西奈山取傳統位置（Jebel Musa 一帶）。
+// 注意：但以理（journey-daniel）是手繪時間軸棋盤，「不在」這支腳本裡。
+// ===========================================================================
+buildRegion({
+  label: '出埃及記之旅',
+  bounds: { lonMin: 30.2, lonMax: 35.4, latMin: 27.9, latMax: 31.5 },
+  // 埃及（含西奈半島與兩個海灣的海岸線）、以色列/巴勒斯坦、約旦、沙烏地（亞喀巴灣東岸）
+  iso: ['EGY', 'ISR', 'PSE', 'JOR', 'SAU'],
+  journeyFile: 'journey-exodus.json',
+  mapFile: 'region-map-exodus.json',
+  labels: [
+    { t: '埃及 · 歌珊地', lat: 30.95, lon: 30.85, kind: 'region' },
+    { t: '地　中　海', lat: 31.35, lon: 32.60, kind: 'sea' },
+    { t: '西奈曠野', lat: 29.45, lon: 34.05, kind: 'region' },
+    { t: '紅　海（蘇伊士灣）', lat: 28.95, lon: 32.75, kind: 'sea' },
+    { t: '往迦南地 ⟶', lat: 30.90, lon: 34.80, kind: 'region' },
+    { t: '米甸', lat: 28.30, lon: 35.05, kind: 'region' },
+  ],
+  cities: {
+    goshen_start:     { lat: 30.95, lon: 31.40 }, // 歌珊地（尼羅河三角洲東部，為奴之家）
+    pharaoh_palace:   { lat: 30.70, lon: 31.20 }, // 法老的王宮（容我的百姓去）
+    ten_plagues:      { lat: 30.50, lon: 31.55 }, // 十災的對決
+    passover_night:   { lat: 30.72, lon: 31.78 }, // 逾越節之夜
+    rameses_depart:   { lat: 30.80, lon: 31.98 }, // 蘭塞出發（Pi-Ramesses 一帶）
+    succoth:          { lat: 30.55, lon: 32.10 }, // 疏割（Tell el-Maskhuta 一帶）
+    etham_pillar:     { lat: 30.28, lon: 32.32 }, // 以倘（曠野邊，雲柱火柱）
+    pihahiroth:       { lat: 30.02, lon: 32.48 }, // 比哈希錄（紅海邊，近蘇伊士）
+    red_sea_cross:    { lat: 29.80, lon: 32.58 }, // 過紅海（海中乾地，闖關站）
+    miriam_song:      { lat: 29.55, lon: 32.80 }, // 米利暗之歌（東岸）
+    shur_desert:      { lat: 29.36, lon: 33.00 }, // 書珥曠野（三天無水）
+    marah:            { lat: 29.18, lon: 33.10 }, // 瑪拉（苦水變甜）
+    elim:             { lat: 29.00, lon: 33.18 }, // 以琳（十二股水泉、七十棵棕樹）
+    sin_wilderness:   { lat: 28.82, lon: 33.30 }, // 汛的曠野（發怨言、應許降嗎哪）
+    manna_gather:     { lat: 28.68, lon: 33.45 }, // 撿拾嗎哪（闖關站）
+    rephidim_water:   { lat: 28.58, lon: 33.60 }, // 利非訂（磐石出水）
+    amalek_battle:    { lat: 28.50, lon: 33.74 }, // 亞瑪力之戰（舉手禱告，闖關站）
+    jethro_advice:    { lat: 28.62, lon: 33.88 }, // 葉忒羅獻策
+    sinai_camp:       { lat: 28.48, lon: 33.93 }, // 西奈山下安營（Jebel Musa 一帶）
+    ten_commandments: { lat: 28.56, lon: 34.06 }, // 西奈山 · 十誡（必停）
+    golden_calf:      { lat: 28.42, lon: 34.00 }, // 金牛犢
+    tabernacle_end:   { lat: 28.54, lon: 34.20 }, // 會幕建成 · 神的榮光（終點）
+  },
+})
+
+// ===========================================================================
+// 約拿宣教之旅（真實地理版）——東地中海岸 → 美索不達米亞。
+//   教學重點：約拿被召去「東邊」的尼尼微（地圖最右、底格里斯河畔），卻往「西邊」
+//   逃出海（往他施／Tarshish，遠在地中海西端、出圖外，用箭頭示意）；大魚之後再
+//   往東去尼尼微。海上各站＝約帕以西的地中海「途中站」（非城市，給海面座標）。
+// ===========================================================================
+buildRegion({
+  label: '約拿宣教之旅',
+  bounds: { lonMin: 30.0, lonMax: 44.5, latMin: 29.5, latMax: 37.8 },
+  // 以色列/巴勒斯坦、黎巴嫩、敘利亞、約旦、伊拉克（尼尼微/美索不達米亞）、土耳其、賽普勒斯、埃及、沙烏地北緣
+  iso: ['ISR', 'PSE', 'LBN', 'SYR', 'JOR', 'IRQ', 'TUR', 'CYP', 'CYN', 'EGY', 'SAU'],
+  journeyFile: 'journey-jonah.json',
+  mapFile: 'region-map-jonah.json',
+  labels: [
+    { t: '地　中　海', lat: 30.4, lon: 32.2, kind: 'sea' },
+    { t: '⟵ 往他施（Tarshish，地中海西端）', lat: 34.7, lon: 30.4, kind: 'sea' },
+    { t: '以色列', lat: 31.0, lon: 35.4, kind: 'region' },
+    { t: '曠野（往尼尼微 ⟶）', lat: 34.9, lon: 39.0, kind: 'region' },
+    { t: '亞述 · 尼尼微', lat: 37.4, lon: 41.8, kind: 'region' },
+  ],
+  // 海上各站把弧線「撐大」一點，免得擠在一起（投影後仍落在約帕以西的地中海）。
+  cities: {
+    jonah_call:       { lat: 32.95, lon: 35.55 }, // 迦特希弗（約拿家鄉，神的呼召；內陸偏東）
+    road_to_joppa:    { lat: 32.55, lon: 35.20 }, // 下約帕的路上（機會卡，途中站）
+    flee_joppa:       { lat: 32.05, lon: 34.75 }, // 約帕港（下到海邊逃跑）
+    board_tarshish:   { lat: 31.80, lon: 34.05 }, // 上船出海（往西）
+    sea_chance:       { lat: 32.55, lon: 33.05 }, // 海上途中
+    great_storm:      { lat: 33.55, lon: 32.20 }, // 海上遇大風暴
+    cast_into_sea:    { lat: 34.10, lon: 31.20 }, // 被拋在海中
+    sink_deep_fate:   { lat: 33.95, lon: 30.55 }, // 沉入深海（命運卡，海面途中站）
+    great_fish:       { lat: 33.30, lon: 30.30 }, // 大魚吞了約拿（逃得最遠處，近他施方向）
+    belly_prayer1:    { lat: 32.55, lon: 30.45 }, // 魚腹禱告 · 呼求（大魚開始把他帶回）
+    belly_prayer_hope:{ lat: 32.05, lon: 30.85 }, // 魚腹禱告 · 仰望
+    belly_prayer2:    { lat: 31.75, lon: 31.55 }, // 魚腹禱告 · 救恩
+    fish_fate:        { lat: 31.55, lon: 32.65 }, // 神吩咐大魚
+    spit_dry_land:    { lat: 31.55, lon: 33.85 }, // 吐在旱地上（回到海岸）
+    second_call:      { lat: 33.55, lon: 37.10 }, // 神第二次呼召（起身往東，內陸）
+    desert_run:       { lat: 34.65, lon: 39.30 }, // 曠野趕路（第四關闖關站，幼發拉底曠野）
+    nineveh_gate_fate:{ lat: 35.55, lon: 41.40 }, // 三日路程的大城（命運卡，近尼尼微）
+    nineveh_repents:  { lat: 36.20, lon: 42.95 }, // 尼尼微全城悔改
+    plant_lesson:     { lat: 36.85, lon: 43.65 }, // 蓖麻樹的功課（城外東北）
+    gods_mercy:       { lat: 35.75, lon: 42.55 }, // 神憐憫尼尼微（城南）
+  },
+})
+
+// ===========================================================================
+// 海路到羅馬（徒 27–28）——整個地中海從東到西：該撒利亞 → 克里特 → 風暴漂流
+//   → 米利大（馬耳他）船難 → 西西里 → 義大利 → 羅馬。風暴與漂流各站＝海面
+//   「途中站」（非城市，照約拿旅程慣例給海面座標，依漂流方向往西排開）。
+// ===========================================================================
+buildRegion({
+  label: '海路到羅馬',
+  bounds: { lonMin: 11.5, lonMax: 36.5, latMin: 31.2, latMax: 43.2 },
+  // 義大利、馬耳他、突尼西亞/利比亞（南岸海岸線）、希臘/阿爾巴尼亞（亞底亞海東岸）、
+  // 土耳其、賽普勒斯、敘利亞、黎巴嫩、以色列/巴勒斯坦、埃及
+  iso: ['ITA', 'MLT', 'TUN', 'LBY', 'GRC', 'ALB', 'MNE', 'HRV', 'TUR', 'CYP', 'CYN', 'SYR', 'LBN', 'ISR', 'PSE', 'EGY'],
+  journeyFile: 'journey4.json',
+  mapFile: 'region-map4.json',
+  labels: [
+    { t: '義大利', lat: 42.6, lon: 13.6, kind: 'region' },
+    { t: '西西里', lat: 37.6, lon: 14.2, kind: 'island' },
+    { t: '米利大（馬耳他）', lat: 35.5, lon: 14.3, kind: 'island-sub' },
+    { t: '克里特', lat: 35.35, lon: 25.1, kind: 'island' },
+    { t: '亞底亞海', lat: 37.8, lon: 18.4, kind: 'sea' },
+    { t: '地　中　海', lat: 33.3, lon: 21.5, kind: 'sea' },
+    { t: '猶太地', lat: 31.9, lon: 35.1, kind: 'region' },
+  ],
+  cities: {
+    caesarea4_start:  { lat: 32.50, lon: 34.89 }, // 該撒利亞（上訴凱撒，出發港）
+    sidon4:           { lat: 33.56, lon: 35.37 }, // 西頓（猶流寬待保羅）
+    myra4:            { lat: 36.26, lon: 29.98 }, // 呂家的每拉（換亞歷山大的運糧船）
+    cnidus_fate:      { lat: 36.55, lon: 27.40 }, // 革尼土對面（命運卡，逆風海路）
+    fair_havens:      { lat: 34.92, lon: 24.75 }, // 佳澳（克里特南岸，保羅的勸告）
+    euroclydon:       { lat: 35.05, lon: 24.30 }, // 友拉革羅狂風（闖關站，克里特外海）
+    cauda4:           { lat: 34.80, lon: 23.65 }, // 高大島（捆綁船底）
+    angel_promise:    { lat: 35.55, lon: 21.20 }, // 天使的應許（漂流海上）
+    midnight_sounding:{ lat: 36.05, lon: 18.80 }, // 十四天的午夜（亞底亞海）
+    sailors_escape:   { lat: 36.10, lon: 17.00 }, // 水手想逃船
+    breaking_bread:   { lat: 35.95, lon: 15.85 }, // 擘餅勸食（機會卡，天將亮）
+    shipwreck:        { lat: 35.70, lon: 15.05 }, // 船擱淺了（將近米利大）
+    malta_welcome:    { lat: 35.88, lon: 14.40 }, // 米利大島（土人接待、毒蛇無害）
+    publius_heal:     { lat: 36.18, lon: 14.18 }, // 部百流的田產（全島得醫治；稍偏西北避免重疊）
+    syracuse4:        { lat: 37.07, lon: 15.29 }, // 敘拉古（西西里，停泊三日）
+    rhegium4:         { lat: 38.11, lon: 15.65 }, // 利基翁（義大利靴尖）
+    puteoli:          { lat: 40.83, lon: 14.12 }, // 部丟利（遇見弟兄，羅馬外港）
+    appian_way:       { lat: 41.20, lon: 13.45 }, // 亞比烏大道（闖關站，最後的陸路）
+    three_taverns:    { lat: 41.52, lon: 12.72 }, // 三館（弟兄來迎，放心壯膽）
+    rome_end:         { lat: 41.89, lon: 12.49 }, // 羅馬（放膽傳講神國，並沒有人禁止）
+  },
+})

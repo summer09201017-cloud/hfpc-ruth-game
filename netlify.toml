@@ -1,0 +1,10 @@
+# Netlify build settings for 路得記·從空到滿 (Vite + PWA).
+# Netlify builds from source on its own Linux image, so the Windows/Node 24
+# local build quirk does not apply here. NODE_VERSION is pinned to 20 because
+# vite-plugin-pwa's Workbox step is unreliable on Node 24.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"

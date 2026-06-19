@@ -1,0 +1,2 @@
+# .bat 必須是 CRLF 換行（LF 會讓 Windows 雙擊閃退）；內容也務必純英文 ASCII。
+*.bat text eol=crlf

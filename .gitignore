@@ -1,0 +1,21 @@
+# dependencies
+node_modules/
+
+# build output (Netlify builds this from source)
+dist/
+
+# large regenerable geodata (gen:map auto-downloads it on demand)
+scripts/_geodata/
+
+# generated screenshots dropped in the repo root by scripts/screenshots.mjs
+/shot-*.png
+/_board-only.png
+
+# local env / editor / OS
+*.local
+.env
+.env.*
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

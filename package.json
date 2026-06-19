@@ -1,0 +1,30 @@
+{
+  "name": "ruth-journey-game",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "路得記·從空到滿 — 互動式聖經大富翁關卡遊戲（救贖與恩慈 hesed；波阿斯＝至近親屬救贖者＝基督的影子）",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "gen:icons": "node scripts/gen-icons.mjs",
+    "gen:map": "node scripts/gen-map.mjs",
+    "sync:jonah": "node scripts/sync-jonah-engine.mjs",
+    "validate": "node scripts/validate.mjs",
+    "test": "npm run validate && npm run test:selfplay && node scripts/smoke-test.mjs",
+    "test:offline": "node scripts/smoke-test.mjs --offline",
+    "test:selfplay": "node scripts/selfplay.mjs",
+    "test:browser": "node scripts/browser-playtest.mjs"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "playwright": "^1.60.0",
+    "vite": "^6.0.7",
+    "vite-plugin-pwa": "^0.21.1"
+  }
+}

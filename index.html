@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#2e86ab" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="路得之旅" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <title>路得記 · 從空到滿</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- 手機直向時蓋住畫面,提示轉成橫向(只在觸控裝置的直向顯示;跟約拿引擎同款) -->
+    <div id="rotate" class="rotate-hint" aria-hidden="true">
+      <div class="rotate-emoji">🔄</div>
+      <p>請把手機轉成<b>橫向</b>來玩<br /><span>轉成橫向會自動全螢幕</span></p>
+    </div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
