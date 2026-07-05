@@ -18,5 +18,9 @@
       <p>請把手機轉成<b>橫向</b>來玩<br /><span>轉成橫向會自動全螢幕</span></p>
     </div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      // 匿名使用統計(play-stats-lite):只記「ruth+日期→次數」,零個資;離線/被擋靜默跳過,不影響遊戲。
+      try { if (location.hostname.endsWith('netlify.app') && navigator.sendBeacon) navigator.sendBeacon('https://hfpc-play-stats.summer09201017.workers.dev/api/ping?g=ruth') } catch (e) {}
+    </script>
   </body>
 </html>
