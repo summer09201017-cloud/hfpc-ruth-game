@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { drawBackdrop, CORNELIUS, ELIJAH, SAUL, DANIEL, EXODUS } from './scenes'
+import { drawBackdrop, CORNELIUS, ELIJAH, SAUL, DANIEL, EXODUS, RUTH } from './scenes'
 
 // 卡片關的 Canvas 場景層。
 //  - 永遠先畫 drawBackdrop(通用輕量背景動畫,所有卡片關共用)。
@@ -7,7 +7,7 @@ import { drawBackdrop, CORNELIUS, ELIJAH, SAUL, DANIEL, EXODUS } from './scenes'
 // 尊重 prefers-reduced-motion:只畫一幀靜態(t=0.8 取一個好看的定格)。
 // 零美術檔、可離線;桌遊嵌入版也能用(只是一個 <canvas>)。
 
-const DRAWERS = { ...CORNELIUS, ...ELIJAH, ...SAUL, ...DANIEL, ...EXODUS }
+const DRAWERS = { ...CORNELIUS, ...ELIJAH, ...SAUL, ...DANIEL, ...EXODUS, ...RUTH }
 
 export default function CardScene({ sceneKey, accent }) {
   const ref = useRef(null)

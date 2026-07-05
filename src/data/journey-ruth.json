@@ -5,11 +5,29 @@
   "scoreLabel": "恩慈點數",
   "turnCap": 120,
   "titles": [
-    { "min": 0, "name": "寄居摩押的" },
-    { "min": 8, "name": "委身的路得" },
-    { "min": 16, "name": "拾穗蒙恩的", "quizBonus": 1 },
-    { "min": 26, "name": "蒙贖之婦", "quizBonus": 1 },
-    { "min": 36, "name": "大衛的曾祖母", "quizBonus": 1 }
+    {
+      "min": 0,
+      "name": "寄居摩押的"
+    },
+    {
+      "min": 8,
+      "name": "委身的路得"
+    },
+    {
+      "min": 16,
+      "name": "拾穗蒙恩的",
+      "quizBonus": 1
+    },
+    {
+      "min": 26,
+      "name": "蒙贖之婦",
+      "quizBonus": 1
+    },
+    {
+      "min": 36,
+      "name": "大衛的曾祖母",
+      "quizBonus": 1
+    }
   ],
   "companions": {
     "拿俄米": {
@@ -73,31 +91,42 @@
         "title": "恰巧到了波阿斯的田",
         "kind": "good",
         "text": "「她恰巧到了以利米勒本族的人波阿斯那塊田裡。」（得 2:3）全卷沒有神蹟，卻處處是神隱藏的手——這「恰巧」正是神的眷顧。恩慈點數 +2。",
-        "effect": { "gospelPoints": 2 }
+        "effect": {
+          "gospelPoints": 2
+        }
       },
       {
         "title": "投靠耶和華的翅膀下",
         "kind": "good",
         "text": "「你來投靠耶和華─以色列神的翅膀下，願你滿得他的賞賜。」（得 2:12）外邦女子主動投靠真神，必不落空。恩慈點數 +2。",
-        "effect": { "gospelPoints": 2 }
+        "effect": {
+          "gospelPoints": 2
+        }
       },
       {
         "title": "拾穗律法的恩典",
         "kind": "good",
         "text": "「在你們的地收割莊稼，不可割盡田角……要留給窮人和寄居的。」（利 19:9-10）神給寄居、孤兒、寡婦的恩典制度。恩慈點數 +2。",
-        "effect": { "gospelPoints": 2 }
+        "effect": {
+          "gospelPoints": 2
+        }
       },
       {
         "title": "波阿斯故意撥落麥穗",
         "kind": "good",
         "text": "波阿斯吩咐僕人從捆裡抽出些來，留在地下任路得拾取（得 2:16）。配備「故意留下的麥穗」——之後答對問答額外 +1。恩慈點數 +1。",
-        "effect": { "addGift": "extra_wheat", "gospelPoints": 1 }
+        "effect": {
+          "addGift": "extra_wheat",
+          "gospelPoints": 1
+        }
       },
       {
         "title": "鄰舍婦人的歡呼",
         "kind": "good",
         "text": "「拿俄米得孩子了！」鄰舍婦人為拿俄米歡喜（得 4:17）。從空到滿，神把哀哭變為跳舞。恩慈點數 +2。",
-        "effect": { "gospelPoints": 2 }
+        "effect": {
+          "gospelPoints": 2
+        }
       }
     ],
     "fate": [
@@ -105,31 +134,43 @@
         "title": "饑荒的年月",
         "kind": "bad",
         "text": "「國中遭遇饑荒。」（得 1:1）連「糧食之家」伯利恆都缺糧，一家人只好往摩押寄居。恩慈點數 -1。",
-        "effect": { "gospelPoints": -1 }
+        "effect": {
+          "gospelPoints": -1
+        }
       },
       {
         "title": "喪夫喪子之痛",
         "kind": "bad",
         "text": "以利米勒死了，兩個兒子也死了，剩下拿俄米沒有丈夫，也沒有兒子（得 1:3-5）。這是「空」的最低點。恩慈點數 -2。",
-        "effect": { "gospelPoints": -2 }
+        "effect": {
+          "gospelPoints": -2
+        }
       },
       {
         "title": "不要叫我拿俄米",
         "kind": "bad",
         "text": "「不要叫我拿俄米（就是甜的意思），要叫我瑪拉（就是苦的意思）……我滿滿地出去，耶和華使我空空地回來。」（得 1:20-21）愁苦中暫停腳步，歇一回合。恩慈點數 -1。",
-        "effect": { "skipNext": true, "gospelPoints": -1 }
+        "effect": {
+          "skipNext": true,
+          "gospelPoints": -1
+        }
       },
       {
         "title": "那更近的親屬",
         "kind": "bad",
         "text": "還有一位比波阿斯更近的親屬，有優先贖回權（得 3:12）。結局未定，叫人懸著心。恩慈點數 -1。",
-        "effect": { "gospelPoints": -1 }
+        "effect": {
+          "gospelPoints": -1
+        }
       },
       {
         "title": "神隱藏的眷顧",
         "kind": "good",
         "text": "縱然眼前盡是苦難，神的手從未離開——祂正在暗中把空翻轉成滿（得 2:20）。前進 1 格，恩慈點數 +1。",
-        "effect": { "move": 1, "gospelPoints": 1 }
+        "effect": {
+          "move": 1,
+          "gospelPoints": 1
+        }
       }
     ]
   },
@@ -160,7 +201,9 @@
       "event": {
         "title": "空的最低點",
         "kind": "bad",
-        "effect": { "drawCard": "fate" },
+        "effect": {
+          "drawCard": "fate"
+        },
         "resultText": "以利米勒死了；兩個兒子娶了摩押女子俄珥巴和路得，住了約十年，也都死了。剩下拿俄米——沒有丈夫，也沒有兩個兒子。翻一張命運卡。"
       },
       "text": "寄居摩押的歲月裡，拿俄米一個一個地失去至親。從「滿」跌到「空」的谷底。"
@@ -177,7 +220,10 @@
       "event": {
         "title": "委身的宣告",
         "kind": "good",
-        "effect": { "addCompanion": "拿俄米", "gospelPoints": 2 },
+        "effect": {
+          "addCompanion": "拿俄米",
+          "gospelPoints": 2
+        },
         "resultText": "「你的國就是我的國，你的神就是我的神。」（得 1:16）路得不只跟隨婆婆，更是投靠了耶和華。「拿俄米」加入同行！恩慈點數 +2。"
       },
       "quizzes": [
@@ -193,7 +239,11 @@
           "explanation": "「你往哪裡去，我也往那裡去……你的國就是我的國，你的神就是我的神。」（得 1:16）真信心是把自己交給神，也交給神的子民——外邦女子主動投靠耶和華翅膀下。",
           "reward": 4
         }
-      ]
+      ],
+      "minigame": {
+        "cards": "ruthChoice",
+        "winPoints": 3
+      }
     },
     {
       "id": "return_bethlehem",
@@ -205,7 +255,9 @@
       "event": {
         "title": "瑪拉（苦）",
         "kind": "bad",
-        "effect": { "gospelPoints": -1 },
+        "effect": {
+          "gospelPoints": -1
+        },
         "resultText": "「我滿滿地出去，耶和華使我空空地回來。」（得 1:21）拿俄米要人叫她「瑪拉（苦）」。然而——她們回到伯利恆，正是動手割大麥的時候（伏筆：神已預備）。恩慈點數 -1。"
       },
       "text": "婆媳二人回到伯利恆，合城都因她們驚訝。拿俄米滿心愁苦，卻不知道神的眷顧已悄悄展開。"
@@ -231,7 +283,10 @@
       "event": {
         "title": "拾穗蒙恩",
         "kind": "good",
-        "effect": { "addGift": "basket", "gospelPoints": 1 },
+        "effect": {
+          "addGift": "basket",
+          "gospelPoints": 1
+        },
         "resultText": "路得拾穗到晚上，裝滿一籃（約一伊法大麥，得 2:17）。配備「拾穗的籃」——之後闖關過關額外 +1。恩慈點數 +1。"
       },
       "minigame": {
@@ -252,7 +307,10 @@
       "event": {
         "title": "投靠翅膀下",
         "kind": "good",
-        "effect": { "addCompanion": "波阿斯", "gospelPoints": 2 },
+        "effect": {
+          "addCompanion": "波阿斯",
+          "gospelPoints": 2
+        },
         "resultText": "「你來投靠耶和華─以色列神的翅膀下，願你滿得他的賞賜。」（得 2:12）波阿斯這位至近親屬救贖者加入同行！恩慈點數 +2。"
       },
       "quizzes": [
@@ -290,7 +348,10 @@
       "event": {
         "title": "六簸箕大麥的記號",
         "kind": "good",
-        "effect": { "addGift": "cloak", "gospelPoints": 1 },
+        "effect": {
+          "addGift": "cloak",
+          "gospelPoints": 1
+        },
         "resultText": "波阿斯量了六簸箕大麥，兜在路得的外衣裡：「不可空手回去見你的婆婆。」（得 3:17）配備「路得的外衣」——空開始翻轉成滿。恩慈點數 +1。"
       },
       "quizzes": [
@@ -306,7 +367,11 @@
           "explanation": "「遮蓋」是求救贖、求盟約遮蓋的意象（參 結 16:8）。波阿斯以正直回應——救贖必須合乎公義，要在城門前公開合法地贖，不是私下偷取。",
           "reward": 3
         }
-      ]
+      ],
+      "minigame": {
+        "cards": "threshingFloor",
+        "winPoints": 3
+      }
     },
     {
       "id": "six_measures",
@@ -318,7 +383,9 @@
       "event": {
         "title": "空翻轉成滿",
         "kind": "good",
-        "effect": { "drawCard": "chance" },
+        "effect": {
+          "drawCard": "chance"
+        },
         "resultText": "路得回到婆婆那裡，拿俄米說：「女兒啊，你只管安坐等候，看這事怎樣成就，因為那人今日不辦成這事必不休息。」神的眷顧正在動工。翻一張機會卡。"
       },
       "text": "路得不空手回去——六簸箕大麥是「滿」的記號。拿俄米看出波阿斯必不歇息，直到把事辦成。"
@@ -334,7 +401,10 @@
       "event": {
         "title": "脫鞋為證",
         "kind": "good",
-        "effect": { "addGift": "shoe", "gospelPoints": 1 },
+        "effect": {
+          "addGift": "shoe",
+          "gospelPoints": 1
+        },
         "resultText": "「從前，在以色列中要定奪甚麼事，或贖回，或交易，這人就脫鞋給那人。以色列人都以此為證據。」（得 4:7）配備「脫下的鞋」——贖回必須在城門前公開、合法。恩慈點數 +1。"
       },
       "quizzes": [
@@ -364,7 +434,10 @@
       "event": {
         "title": "至近親屬的買贖",
         "kind": "good",
-        "effect": { "addGift": "kinsman_covenant", "gospelPoints": 3 },
+        "effect": {
+          "addGift": "kinsman_covenant",
+          "gospelPoints": 3
+        },
         "resultText": "波阿斯付代價贖回一無所有的外邦寡婦——這正是基督為我們所做的（弗 1:7）。配備「至近親屬的盟約」——可擋下一次「暫停一回合」。恩慈點數 +3。"
       },
       "quizzes": [
@@ -380,7 +453,11 @@
           "explanation": "波阿斯甘願付代價，贖回一無所有、毫無權利的外邦寡婦，正是基督為我們成就的救贖（弗 1:7、加 4:4-5）。這是全卷最重的福音指向。",
           "reward": 4
         }
-      ]
+      ],
+      "minigame": {
+        "cards": "gateRedemption",
+        "winPoints": 3
+      }
     },
     {
       "id": "obed_born",
@@ -392,7 +469,10 @@
       "event": {
         "title": "從空到滿",
         "kind": "good",
-        "effect": { "addGift": "obed", "gospelPoints": 2 },
+        "effect": {
+          "addGift": "obed",
+          "gospelPoints": 2
+        },
         "resultText": "鄰舍婦人說：「拿俄米得孩子了！」又給孩子起名俄備得。「有這兒婦比有七個兒子還好！」（得 4:15）空懷而去、滿懷而歸——苦（瑪拉）被神的恩慈除去。配備「俄備得」。恩慈點數 +2。"
       },
       "text": "波阿斯娶了路得，耶和華使她懷孕生了一個兒子。婦人們為拿俄米歡呼——這孩子要提起她的精神、奉養她的老。"
@@ -424,6 +504,10 @@
         "companions": "路得、波阿斯、俄備得、拿俄米",
         "willMeet": "俄備得→耶西→大衛王→……→基督",
         "notYetWritten": "路得記放在士師記的黑暗之後，像一道光：在「各人任意而行」的時代，仍有一對人活出 hesed（盟約的慈愛），神就藉著他們預備了大衛、預備了基督。"
+      },
+      "minigame": {
+        "cards": "ruthFinale",
+        "winPoints": 5
       }
     }
   ]

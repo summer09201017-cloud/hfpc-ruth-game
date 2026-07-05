@@ -14,8 +14,8 @@
 > | 2 | **journey-ruth.json 題庫經文 /cuv-check 全面複驗** | ~1hr | content.js 自稱「已查證」仍被抓 5 處,journey 的自稱同樣不可盡信 |
 > | 3 | **部署 Netlify(A 站)** | ~30min | netlify.toml 已備;建站→push main 自動部署→`/ship-check` 驗線上 |
 > | 4 | **加進大廳**(add-to-collection) | ~10min | 部署+過審後;大廳金句 `ruth-1-16` 已 verified、等這張卡點亮 |
-> | 5 | 卡片三關:抉擇(得 1)/禾場求贖(得 3)/城門贖回(得 4) | 各~半天 | card-flow-minigame + L6 手繪;設計稿見 bible-journey-planner references/路得記-設計.md |
-> | 6 | 家譜→基督 五幕反思終局 | ~半天 | bible-card-finale(俄備得→耶西→大衛→基督,波阿斯預表救贖主) |
+> | ✅ | ~~卡片三關~~ | — | **已做(2026-07-06)**:specs.js ruthChoice/threshingFloor/gateRedemption + scenes.js RUTH 六幕(ruthRoad/ruthCling/ruthThresh/ruthGate/ruthBaby/ruthLine),掛回站點 ruth_clings/threshing_floor/gate_redemption(minigame.cards,winPoints 3);引文全 cuv 逐字查證;Playwright 三關全程通(含答錯溫柔重試);⚠ 敘述文案 AI 草擬待牧者審 |
+> | ✅ | ~~家譜→基督 五幕反思終局~~ | — | **已做(2026-07-06)**:specs.js ruthFinale(空/滿/名字/家譜/真正的救贖者五幕,得1:21→4:14-17→太1:5-6→路2:11),掛 davids_line 終點站(winPoints 5),家譜星鏈場景通到基督;Playwright 全程通;⚠ 文案待牧者審 |
 > | 7 | 清 `src/minigames/` 繼承母體死碼(jonah/sling/cards/ark*) | ~1hr | 先確認 MiniGameModal/路由沒引用再刪;走 PR |
 >
 > **🚫 刻意不做**:gen-map(蛇形手繪棋盤是刻意設計);把恩慈點數改成競爭性計分(路得記的核心是 hesed 不是輸贏)。

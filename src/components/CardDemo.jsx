@@ -38,7 +38,7 @@ export default function CardDemo({ specKey }) {
       </button>
       <div className="minigame minigame--demo">
         <div className="minigame__head">
-          <span className="minigame__kind">逆轉奇兵</span>
+          <span className="minigame__kind">路得記</span>
           <span className="minigame__title">{spec.title}</span>
         </div>
         <div className="minigame__stage">

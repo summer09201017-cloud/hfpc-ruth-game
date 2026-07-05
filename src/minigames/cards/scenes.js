@@ -766,3 +766,104 @@ function gloryfill(ctx, w, h, t) { // 榮光充滿會幕
   rays(ctx, w, h, t, w * 0.5, 0.8)
 }
 export const EXODUS = { plagues, passover, sinai, tablets, goldcalf, intercede, glory, tabernacle, gloryfill }
+
+// ══════════════════ 路得記(RUTH)場景 ══════════════════
+// L6 手繪:離別路口/緊抱宣告/禾場夜/城門脫鞋/懷抱俄備得/家譜星鏈。零美術檔。
+function ruthSky(ctx, w, h, top, bot) { const g = ctx.createLinearGradient(0, 0, 0, h); g.addColorStop(0, top); g.addColorStop(1, bot); ctx.fillStyle = g; ctx.fillRect(0, 0, w, h) }
+function ruthRoad(ctx, w, h, t) { // 摩押路口:俄珥巴遠去,路得留下
+  const k = h / 240, gy = h * 0.86
+  ruthSky(ctx, w, h, '#d9a06a', '#e8cf9c')
+  ctx.fillStyle = '#c9a06a'; ctx.fillRect(0, gy, w, h - gy)
+  // 岔路(兩條土徑)
+  ctx.strokeStyle = '#b08a52'; ctx.lineWidth = 10 * k; ctx.lineCap = 'round'
+  ctx.beginPath(); ctx.moveTo(w * 0.5, gy + 4 * k); ctx.lineTo(w * 0.16, h); ctx.moveTo(w * 0.5, gy + 4 * k); ctx.lineTo(w * 0.86, h); ctx.stroke()
+  // 俄珥巴(右側遠去)
+  person(ctx, w * 0.82, gy, k * 0.9, { robe: '#9c7a4a', headColor: '#e0d0a8', walk: t * 6, face: 'calm' })
+  // 拿俄米(年長,愁苦)與路得(靠近伸手)
+  person(ctx, w * 0.42, gy, k * 1.05, { robe: '#7a7a8c', headColor: '#d8d0c0', face: 'worry' })
+  person(ctx, w * 0.26, gy, k, { robe: '#b06a5a', headColor: '#e8d8b8', arms: 'reach', reach: 20, reachUp: 2, face: 'calm' })
+}
+function ruthCling(ctx, w, h, t) { // 路得的宣告:你的國就是我的國
+  const k = h / 240, gy = h * 0.86
+  ruthSky(ctx, w, h, '#e3b478', '#efd9a8'); ctx.fillStyle = '#c9a06a'; ctx.fillRect(0, gy, w, h - gy)
+  rays(ctx, w, h, t, w * 0.36, 0.5)
+  person(ctx, w * 0.5, gy, k * 1.05, { robe: '#7a7a8c', headColor: '#d8d0c0', face: 'awe' })
+  person(ctx, w * 0.36, gy, k, { robe: '#b06a5a', headColor: '#e8d8b8', pose: 'kneel', arms: 'reach', reach: 20, reachUp: 10, face: 'calm' })
+  speechBubble(ctx, w * 0.34, gy - 100 * k, k, '你的國就是我的國')
+}
+function ruthThresh(ctx, w, h, t) { // 禾場夜:麥堆、睡臥的波阿斯、敬候的路得、星月
+  const k = h / 240, gy = h * 0.86
+  ruthSky(ctx, w, h, '#1d2a4a', '#3a4a6a'); ctx.fillStyle = '#5a4a34'; ctx.fillRect(0, gy, w, h - gy)
+  ctx.fillStyle = '#f0e6c0'
+  for (let i = 0; i < 14; i++) { const sx = ((i * 137) % 100) / 100 * w, sy = ((i * 61) % 45) / 100 * h; ctx.globalAlpha = 0.5 + 0.5 * Math.sin(t * 2 + i); ctx.fillRect(sx, sy, 2 * k, 2 * k) }
+  ctx.globalAlpha = 1
+  ctx.beginPath(); ctx.arc(w * 0.84, h * 0.16, 12 * k, 0, TAU); ctx.fillStyle = '#f4ecc8'; ctx.fill() // 月
+  // 麥堆(兩座)
+  ctx.fillStyle = '#b89858'
+  ctx.beginPath(); ctx.arc(w * 0.7, gy, 34 * k, Math.PI, 0); ctx.fill()
+  ctx.beginPath(); ctx.arc(w * 0.14, gy, 24 * k, Math.PI, 0); ctx.fill()
+  sleeper(ctx, w * 0.56, gy, k * 1.15, '#5a7a9c') // 波阿斯睡在麥堆旁
+  person(ctx, w * 0.34, gy, k * 0.95, { robe: '#b06a5a', headColor: '#e8d8b8', pose: 'kneel', arms: 'pray', face: 'calm' }) // 路得敬候
+}
+function ruthGate(ctx, w, h, t) { // 城門口:長老作見證,脫鞋為證
+  const k = h / 240, gy = h * 0.86
+  ruthSky(ctx, w, h, '#cfe0e8', '#e8dcc0'); ctx.fillStyle = '#c2a878'; ctx.fillRect(0, gy, w, h - gy)
+  // 城門(雙塔+拱門)
+  ctx.fillStyle = '#a89060'
+  ctx.fillRect(w * 0.06, gy - 120 * k, 34 * k, 120 * k); ctx.fillRect(w * 0.3, gy - 120 * k, 34 * k, 120 * k)
+  ctx.fillRect(w * 0.06, gy - 132 * k, w * 0.24 + 34 * k, 16 * k)
+  ctx.fillStyle = '#6a5636'; ctx.beginPath(); ctx.arc(w * 0.215, gy, 26 * k, Math.PI, 0); ctx.fill() // 拱門
+  // 長老兩位與波阿斯宣告
+  person(ctx, w * 0.56, gy, k, { robe: '#7a8a52', headColor: '#e0d0a8', beard: true, face: 'calm' })
+  person(ctx, w * 0.7, gy, k, { robe: '#9c7a4a', headColor: '#d8c8a0', beard: true, face: 'calm' })
+  person(ctx, w * 0.86, gy, k * 1.1, { robe: '#5a7a9c', headColor: '#d8c39a', beard: true, arms: 'speak', face: 'joy' }) // 波阿斯
+  // 脫下的鞋(見證的記號,置中發亮)
+  const sx = w * 0.44, sy = gy - 6 * k
+  const gl = ctx.createRadialGradient(sx, sy, 0, sx, sy, 30 * k); gl.addColorStop(0, 'rgba(255,240,180,0.7)'); gl.addColorStop(1, 'rgba(255,240,180,0)')
+  ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(sx, sy, 30 * k, 0, TAU); ctx.fill()
+  ctx.fillStyle = '#7a5636'; ctx.beginPath(); ctx.ellipse(sx, sy, 13 * k, 5 * k, -0.2, 0, TAU); ctx.fill()
+  ctx.fillStyle = '#8a6646'; ctx.fillRect(sx - 4 * k, sy - 9 * k, 8 * k, 7 * k)
+}
+function ruthBaby(ctx, w, h, t) { // 拿俄米得孩子了:懷抱俄備得
+  const k = h / 240, gy = h * 0.86
+  ruthSky(ctx, w, h, '#f2dfae', '#f7ecd2'); ctx.fillStyle = '#c9a06a'; ctx.fillRect(0, gy, w, h - gy)
+  rays(ctx, w, h, t, w * 0.5, 0.7)
+  house(ctx, w * 0.88, gy, k)
+  person(ctx, w * 0.5, gy, k * 1.1, { robe: '#7a7a8c', headColor: '#d8d0c0', arms: 'pray', face: 'joy' }) // 拿俄米
+  const by = gy - 52 * k
+  ctx.fillStyle = '#f4e8d0'; ctx.beginPath(); ctx.ellipse(w * 0.5, by, 12 * k, 8 * k, 0.15, 0, TAU); ctx.fill() // 襁褓
+  ctx.fillStyle = '#e8bb8d'; ctx.beginPath(); ctx.arc(w * 0.5 + 8 * k, by - 2 * k, 5 * k, 0, TAU); ctx.fill() // 嬰孩頭
+  ctx.fillStyle = '#2c2016'; ctx.beginPath(); ctx.arc(w * 0.5 + 7 * k, by - 3 * k, 0.9 * k, 0, TAU); ctx.arc(w * 0.5 + 9.5 * k, by - 3 * k, 0.9 * k, 0, TAU); ctx.fill()
+  // 鄰舍婦人歡喜
+  person(ctx, w * 0.24, gy, k * 0.95, { robe: '#9c6a8a', headColor: '#e8d8b8', arms: 'up', face: 'joy' })
+  person(ctx, w * 0.74, gy, k * 0.95, { robe: '#b06a5a', headColor: '#e8d8b8', arms: 'up', face: 'joy' })
+}
+function ruthLine(ctx, w, h, t) { // 家譜星鏈:路得→俄備得→耶西→大衛→……→基督
+  const k = h / 240
+  ruthSky(ctx, w, h, '#141c38', '#2a3a5c')
+  ctx.fillStyle = '#f0e6c0'
+  for (let i = 0; i < 18; i++) { const sx = ((i * 97) % 100) / 100 * w, sy = ((i * 53) % 70) / 100 * h; ctx.globalAlpha = 0.4 + 0.5 * Math.sin(t * 2 + i * 1.7); ctx.fillRect(sx, sy, 2 * k, 2 * k) }
+  ctx.globalAlpha = 1
+  const names = ['路得', '俄備得', '耶西', '大衛']
+  const x0 = w * 0.14, y0 = h * 0.78, x1 = w * 0.66, y1 = h * 0.3
+  ctx.strokeStyle = 'rgba(240,220,150,0.8)'; ctx.lineWidth = 2.4 * k
+  ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke()
+  ctx.setLineDash([5 * k, 6 * k]); ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(w * 0.84, h * 0.16); ctx.stroke(); ctx.setLineDash([])
+  names.forEach((nm, i) => {
+    const p = i / (names.length - 1), nx = lerp(x0, x1, p), ny = lerp(y0, y1, p)
+    ctx.fillStyle = '#f7ecc8'; ctx.beginPath(); ctx.arc(nx, ny, 16 * k, 0, TAU); ctx.fill()
+    ctx.strokeStyle = '#caa05a'; ctx.lineWidth = 2 * k; ctx.stroke()
+    ctx.fillStyle = '#5a4318'; ctx.font = `bold ${9.5 * k}px "Noto Sans TC","Microsoft JhengHei",sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+    ctx.fillText(nm, nx, ny)
+  })
+  // 終點:基督的大光(伯利恆之星)
+  const cx = w * 0.84, cy = h * 0.16, pul = 1 + Math.sin(t * 2.2) * 0.12
+  const gl = ctx.createRadialGradient(cx, cy, 0, cx, cy, 46 * k * pul); gl.addColorStop(0, 'rgba(255,250,210,0.95)'); gl.addColorStop(1, 'rgba(255,250,210,0)')
+  ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(cx, cy, 48 * k * pul, 0, TAU); ctx.fill()
+  ctx.strokeStyle = '#fff7d8'; ctx.lineWidth = 2.6 * k; ctx.lineCap = 'round'; ctx.beginPath()
+  for (let i = 0; i < 4; i++) { const a = (i / 4) * Math.PI; ctx.moveTo(cx - Math.cos(a) * 20 * k * pul, cy - Math.sin(a) * 20 * k * pul); ctx.lineTo(cx + Math.cos(a) * 20 * k * pul, cy + Math.sin(a) * 20 * k * pul) }
+  ctx.stroke()
+  ctx.fillStyle = '#f7ecc8'; ctx.font = `bold ${11 * k}px "Noto Sans TC","Microsoft JhengHei",sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'
+  ctx.fillText('基督', cx, cy + 60 * k)
+}
+export const RUTH = { ruthRoad, ruthCling, ruthThresh, ruthGate, ruthBaby, ruthLine }
