@@ -2,13 +2,17 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-> 📌 **現況速覽（2026-06-19）**：從 `hfpc-paul-game` 母體複製、瘦身成的**獨立路得記 repo**。
-> ✅ **可玩棋盤 MVP**：唯一旅程 `ruth`（`src/data/journey-ruth.json`，14 站手繪蛇形棋盤）；`validate` 全綠、
-> `selfplay` 1200 場全 `all_finished`、`build` 成功（PWA 11 項預快取）、本機 `preview` 實測 HTTP 200。經文已用 cuv MCP 逐節查證。
-> 🔜 **拾麥穗 Canvas 收集關**（signature，得 2）：第 6 站現以問答呈現；下一步把 `src/minigames/elijah/` 換皮成 `src/minigames/gleaning/`
-> （路得/麥田/波阿斯故意撥落/日暮裝滿一籃），以 `engine:'gleaning'` 掛到第 6 站。再做卡片三關 + 家譜→基督反思終局 + 部署 + 大廳卡片。
-> ⚠️ `src/minigames/` 下 jonah/sling/cards/ark* 是**繼承母體**、路得記未掛用，可日後清；`roadmap.md` / `讀我-HANDOFF.txt` 仍是 paul 舊內容，待重寫。
-> 設計全稿 → `bible-journey-planner` skill 的 `references/路得記-設計.md`。
+> 📌 **現況速覽(2026-07-05)**:從 `hfpc-paul-game` 母體複製、瘦身成的**獨立路得記 repo**。
+> ✅ **可玩棋盤 MVP**:唯一旅程 `ruth`(`src/data/journey-ruth.json`,14 站手繪蛇形棋盤,不走 gen-map);`validate` 全綠、
+> `selfplay` 1200 場全 `all_finished`、`build` 成功(PWA 11 項預快取)。
+> ✅ **🌾 拾麥穗蒙恩收集關(gleaning)已完成可玩**(舊版本段曾標「待做」是文件漂移——引擎隨初始 commit 就在):
+> `src/minigames/gleaning/` 8 模組(elijah 換皮:撿麥穗回體力/波阿斯故意撥落/日暮裝滿一籃/歸零=溫柔歇息);
+> `?demo=gleaning` 單獨玩、第 6 站 `engine:'gleaning'` 已接、`play-gleaning.bat` 雙擊即玩。
+> ✅ **2026-07-05 驗收+經文修正**:Playwright 實測 console 零錯誤;content.js 引文 cuv 逐字複驗**修 5 處**
+> (跳句/漏字/「她」→和合本原文「他」),省略一律明標「……」——**檔頭自稱「已查證」不可信,改引文必先 lookup**。
+> 🔜 待做(照序):文案送牧者審 → journey 題庫 `/cuv-check` 全面複驗 → 部署 Netlify(A 站)→ 大廳加卡 →
+> 卡片三關 + 家譜→基督五幕終局 → 清 minigames/ 繼承死碼(jonah/sling/cards/ark*,路得未掛用)。
+> 設計全稿 → `bible-journey-planner` skill 的 `references/路得記-設計.md`;`roadmap.md`/`讀我-HANDOFF.txt` 已於 2026-07-05 重寫為路得記專屬。
 
 ## What this is
 
