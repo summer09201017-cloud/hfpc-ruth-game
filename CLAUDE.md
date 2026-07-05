@@ -10,7 +10,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 > `?demo=gleaning` 單獨玩、第 6 站 `engine:'gleaning'` 已接、`play-gleaning.bat` 雙擊即玩。
 > ✅ **2026-07-05 驗收+經文修正**:Playwright 實測 console 零錯誤;content.js 引文 cuv 逐字複驗**修 5 處**
 > (跳句/漏字/「她」→和合本原文「他」),省略一律明標「……」——**檔頭自稱「已查證」不可信,改引文必先 lookup**。
-> 🔜 待做(照序):文案送牧者審 → journey 題庫 `/cuv-check` 全面複驗 → 部署 Netlify(A 站)→ 大廳加卡 →
+> ✅ 2026-07-06:牧者已過審(她→他 4 處裁定改回「她」,以 cuv MCP 為準)、/cuv-check 完整複驗 🔴0/🟠0、Netlify 已接 GitHub 自動部署(07-05 深夜)。
+> 🔜 待做(照序):大廳 ruth 卡確認指向正確 →
 > 卡片三關 + 家譜→基督五幕終局 → 清 minigames/ 繼承死碼(jonah/sling/cards/ark*,路得未掛用)。
 > 設計全稿 → `bible-journey-planner` skill 的 `references/路得記-設計.md`;`roadmap.md`/`讀我-HANDOFF.txt` 已於 2026-07-05 重寫為路得記專屬。
 

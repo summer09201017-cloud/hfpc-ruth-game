@@ -10,7 +10,7 @@
 > **🔜 真正待做(CP 值 × 工時排序):**
 > | # | 項目 | ⏱ | 備註 |
 > |---|---|---|---|
-> | 1 | **文案送牧者審**(gleaning content.js + journey-ruth.json 題庫) | 牧師時間 | 過審前不上線;用 `/review-queue` 盤點、pastor-review 打包 |
+> | ✅ | ~~文案送牧者審~~ | — | **已過審(2026-07-06)**:送審包 docs/路得記-題庫送審-2026-07-06.html;「她→他」4 處牧者裁定改回「她」(以 cuv MCP 為準),/cuv-check 完整版 🟠→0(報告 docs/cuv-check-報告-2026-07-06.md) |
 > | 2 | **journey-ruth.json 題庫經文 /cuv-check 全面複驗** | ~1hr | content.js 自稱「已查證」仍被抓 5 處,journey 的自稱同樣不可盡信 |
 > | 3 | **部署 Netlify(A 站)** | ~30min | netlify.toml 已備;建站→push main 自動部署→`/ship-check` 驗線上 |
 > | 4 | **加進大廳**(add-to-collection) | ~10min | 部署+過審後;大廳金句 `ruth-1-16` 已 verified、等這張卡點亮 |
