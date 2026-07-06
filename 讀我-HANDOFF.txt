@@ -4,6 +4,20 @@
 GitHub:summer09201017-cloud/hfpc-ruth-game(唯一真相;桌面 zip 只是備援快照)
 ============================================================
 
+★★★★★ 本輪(2026-07-06,HFP 機)★★★ 先讀這段(最新)★★★
+================================================================================
+ ◆ 🟢 Netlify 已接 GitHub(07-05 深夜,installation_id 114635663),push main 自動部署;線上=新版。
+ ◆ 🟢 牧者已過審(07-06):「她→他」4 處裁定改回「她」(以 cuv MCP unv.json 為準),/cuv-check 🟠→0
+   (腳本 scripts/cuv-check-ruth.mjs、報告與送審包在 docs/)。
+ ◆ 🟢 卡片三關+家譜終局已做(07-06):specs.js ruthChoice/threshingFloor/gateRedemption/ruthFinale
+   +scenes.js RUTH 六幕 L6 手繪,掛回 4 站點(ruth_clings/threshing_floor/gate_redemption/davids_line)。
+   Playwright 四關全程通。⚠ 這批新敘述文案 AI 草擬待牧者審(引文已 cuv 逐字查證)。
+ ◆ 🟢 接匿名使用統計 beacon(g=ruth)。
+★ 待做(照序):1.新卡片文案送牧者審 2.清母體死碼(/dead-code-sweep 盤點;cards/elijah 已掛用要留)
+ 3.大廳 ruth 卡確認(已上線,照常) 4.卡片關過關句烤 mp3(本 repo 尚無 tts 管線,照 /tts-bake 補)。
+================================================================================
+
+
 ■ 現況一句話(2026-07-05)
   棋盤 MVP + 拾麥穗收集關「都已完成、可玩」,還沒部署、還沒進大廳;
   文案已於 2026-07-06 過牧者審(她→他 4 處裁定改回「她」)。最舊的文件債(roadmap/HANDOFF 是 paul 舊內容)已清。
