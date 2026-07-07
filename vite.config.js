@@ -31,7 +31,7 @@ export default defineConfig({
       },
       workbox: {
         // 把所有靜態資源都快取起來 → 裝好之後可離線遊玩。
-        globPatterns: ['**/*.{js,css,html,png,svg,json,woff2}'],
+        globPatterns: ['**/*.{js,css,html,png,svg,json,woff2,mp3}'],
       },
     }),
   ],

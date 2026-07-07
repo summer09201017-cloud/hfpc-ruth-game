@@ -10,7 +10,6 @@
     "preview": "vite preview",
     "gen:icons": "node scripts/gen-icons.mjs",
     "gen:map": "node scripts/gen-map.mjs",
-    "sync:jonah": "node scripts/sync-jonah-engine.mjs",
     "validate": "node scripts/validate.mjs",
     "test": "npm run validate && npm run test:selfplay && node scripts/smoke-test.mjs",
     "test:offline": "node scripts/smoke-test.mjs --offline",
@@ -23,6 +22,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
+    "msedge-tts": "^2.0.6",
     "playwright": "^1.60.0",
     "vite": "^6.0.7",
     "vite-plugin-pwa": "^0.21.1"

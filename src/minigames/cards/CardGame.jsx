@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import CardScene from './CardScene'
 import * as CardAudio from './cardAudio'
+import { initSpeech, speakScripture, stopSpeech } from '../../speak.js'
 
 // 卡片流程闖關播放器（純 React，不用 Canvas 引擎；內容規格見 specs.js）。
 // 與約拿 3/5/6 卡片關同精神：不會失敗——答錯溫柔重試，走完全部 step 即過關。
@@ -136,7 +137,7 @@ export default function CardGame({ spec, onComplete }) {
   const [sub, setSub] = useState('ask')
   const [score, setScore] = useState(0)
   const [wrongs, setWrongs] = useState(0) // 本題答錯次數(算分:第一次答對最高分)
-  const maxScore = (spec.steps ? spec.steps.length : 0) * 3 // 滿分 = 每題 3 分
+  const maxScore = (spec.steps ? spec.steps.filter((s) => s.kind !== 'info').length : 0) * 3 // 滿分 = 每「題」3 分(info 純劇情幕不計分,別灌進分母——反思型終局才不會永遠看起來低分)
 
   // 場景配色(Canvas 背景動畫用);可在 spec 設 accent:[r,g,b]
   const accent = spec.accent || [120, 140, 170]
@@ -152,6 +153,18 @@ export default function CardGame({ spec, onComplete }) {
     CardAudio.play(music)
     return () => CardAudio.stop()
   }, [music])
+
+  // 過關自動朗讀經文(系列預設;沒中文語音→靜默 fallback;隨🔇靜音、切卡/卸載即停)。見 skill web-speech-scripture。
+  const winVerse = (spec.done && spec.done.line) || (spec.intro && spec.intro.line) || ''
+  const winRef = (spec.done && spec.done.ref) || (spec.intro && spec.intro.ref) || ''
+  useEffect(() => {
+    initSpeech()
+    return () => stopSpeech()
+  }, [])
+  useEffect(() => {
+    if ((stage === 'done' || stage === 'lost') && winVerse) speakScripture(winVerse, { isMuted: () => musicMuted, ref: winRef })
+    return () => stopSpeech() // 切卡/卸載就停,別蓋到下一關（過關 done 與失敗 lost 都朗讀經文）
+  }, [stage])
 
   const stepIdx = typeof stage === 'number' ? stage : -1
   const step = stepIdx >= 0 ? spec.steps[stepIdx] : null
@@ -226,6 +239,15 @@ export default function CardGame({ spec, onComplete }) {
             <span className="mgcard__ref">{vRef}</span>
             {vLine}
           </div>
+        )}
+        {vLine && (
+          <button
+            type="button"
+            className="btn mgcard__replay"
+            onClick={() => speakScripture(vLine, { isMuted: () => musicMuted, ref: vRef })}
+          >
+            🔊 再聽一次
+          </button>
         )}
         <div className="mgcard__kicker mgcard__kicker--reveal">{c.kicker}</div>
         <p className="mgcard__body">{c.body}</p>
@@ -365,7 +387,7 @@ export default function CardGame({ spec, onComplete }) {
           className="mgcard__mute"
           aria-label={musicMuted ? '開啟音樂' : '關閉音樂'}
           title={musicMuted ? '開啟背景音樂' : '關閉背景音樂'}
-          onClick={() => setMusicMuted(CardAudio.toggleMute())}
+          onClick={() => { const m = CardAudio.toggleMute(); setMusicMuted(m); if (m) stopSpeech() }}
         >
           {musicMuted ? '🔇' : '🎵'}
         </button>

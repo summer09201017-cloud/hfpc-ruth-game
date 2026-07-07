@@ -4,7 +4,18 @@
 GitHub:summer09201017-cloud/hfpc-ruth-game(唯一真相;桌面 zip 只是備援快照)
 ============================================================
 
-★★★★★ 本輪(2026-07-06,HFP 機)★★★ 先讀這段(最新)★★★
+★★★★★ 本輪(2026-07-07)★★★ 先讀這段(最新)★★★
+================================================================================
+ ◆ 🟢 tts 管線建成+朗讀鐵則落地:照 paul 抄 speak.js/ttsFix.js/gen-tts.mjs;卡片四關過關自動朗讀
+   (CardGame 對齊 paul 版)+gleaning 過關朗讀得 2:17;5 句曉臻 mp3 烤畢(manifest 5 句、
+   vite precache 17 entries 含 mp3)。新句子:加進 scripts/tts-verses.json → node scripts/gen-tts.mjs 跑到「新產 0」。
+ ◆ 🟢 母體死碼清完:jonah/sling/arkbuild/arkpairs 引擎+六個母體 Demo+main.jsx 路由+sync-jonah/sling/ark 腳本+
+   sync:jonah script+play-ark-*.bat 全移除;MiniGameModal 瘦身(cards+gleaning+elijah);
+   smoke-test 嵌入契約改守 gleaning。npm test 全綠、test:offline 55 綠。
+ ◆ 🔜 剩:卡片四關敘述文案送牧者審(引文已 cuv 核)→ 過審後大廳點卡(標 kind)。
+================================================================================
+
+★★★★ 上輪(2026-07-06,HFP 機)★★★
 ================================================================================
  ◆ 🟢 Netlify 已接 GitHub(07-05 深夜,installation_id 114635663),push main 自動部署;線上=新版。
  ◆ 🟢 牧者已過審(07-06):「她→他」4 處裁定改回「她」(以 cuv MCP unv.json 為準),/cuv-check 🟠→0

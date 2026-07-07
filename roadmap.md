@@ -1,6 +1,19 @@
 # 🌾 路得記·從空到滿 — 進度藍圖(已完成 vs 真正待做)
 
-> ## ⭐ 對齊現況:2026-07-05(最新,接手 AI 先讀這段)
+> ## ⭐ 對齊現況:2026-07-07(最新,接手 AI 先讀這段)
+>
+> **✅ 本輪完成(tts 管線+朗讀鐵則落地+母體死碼清完):**
+> - **tts 管線建成**:照 paul 抄 `src/speak.js`/`src/ttsFix.js`/`scripts/gen-tts.mjs`;`scripts/tts-verses.json` 5 句、
+>   曉臻 mp3 烤畢(新產 5→重跑 0);vite precache 加 mp3(17 entries)。
+> - **朗讀接上**:卡片四關過關自動朗讀 intro 經文(CardGame 對齊 paul 版:+speakScripture/🔊 再聽一次/滿分只算計分題);
+>   gleaning 過關朗讀得 2:17。固定句零機器聲。
+> - **死碼清完(原表第 7 項)**:jonah/sling/arkbuild/arkpairs 四引擎+SlingDemo/RedSeaDemo/CorneliusActionDemo/
+>   SaulActionDemo/ArkPairsDemo/ArkBuildDemo+main.jsx 六路由+sync-jonah/sling-*/_ark-beard-* 腳本+
+>   package.json sync:jonah+play-ark-*.bat 全數移除;MiniGameModal 瘦身成 cards+gleaning+elijah;
+>   smoke-test 嵌入契約改守 gleaning。npm test 全綠、test:offline 55 綠、build 成功(Node 24 先刪 dist)。
+> **🔜 剩**:卡片四關敘述文案送牧者審(引文已 cuv 核)→ 過審後大廳點卡(記得標 kind)。
+
+> ## ⭐ 對齊現況:2026-07-05(接手 AI 先讀這段)
 >
 > **✅ 已完成(別重做):**
 > - **可玩棋盤 MVP(2026-06-20 初始 commit 就有)**:唯一旅程 `ruth`(`src/data/journey-ruth.json`,14 站手繪蛇形棋盤,**不走 gen-map**,x/y 手擺——同 paul 的 daniel 例外);恩慈點數(hesed);輕 RPG(companions/gifts);`validate` 全綠、`selfplay` 1200 場全 `all_finished`、`build` 成功(PWA 11 項預快取)。
@@ -16,7 +29,7 @@
 > | 4 | **加進大廳**(add-to-collection) | ~10min | 部署+過審後;大廳金句 `ruth-1-16` 已 verified、等這張卡點亮 |
 > | ✅ | ~~卡片三關~~ | — | **已做(2026-07-06)**:specs.js ruthChoice/threshingFloor/gateRedemption + scenes.js RUTH 六幕(ruthRoad/ruthCling/ruthThresh/ruthGate/ruthBaby/ruthLine),掛回站點 ruth_clings/threshing_floor/gate_redemption(minigame.cards,winPoints 3);引文全 cuv 逐字查證;Playwright 三關全程通(含答錯溫柔重試);⚠ 敘述文案 AI 草擬待牧者審 |
 > | ✅ | ~~家譜→基督 五幕反思終局~~ | — | **已做(2026-07-06)**:specs.js ruthFinale(空/滿/名字/家譜/真正的救贖者五幕,得1:21→4:14-17→太1:5-6→路2:11),掛 davids_line 終點站(winPoints 5),家譜星鏈場景通到基督;Playwright 全程通;⚠ 文案待牧者審 |
-> | 7 | 清 `src/minigames/` 繼承母體死碼(jonah/sling/cards/ark*) | ~1hr | 先確認 MiniGameModal/路由沒引用再刪;走 PR |
+> | ✅ | ~~清 `src/minigames/` 繼承母體死碼(jonah/sling/ark*)~~ | — | **已清(2026-07-07)**,見最上方 07-07 段(cards/elijah 掛用保留) |
 >
 > **🚫 刻意不做**:gen-map(蛇形手繪棋盤是刻意設計);把恩慈點數改成競爭性計分(路得記的核心是 hesed 不是輸贏)。
 

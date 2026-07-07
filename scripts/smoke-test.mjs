@@ -1,9 +1,9 @@
-// 保羅大富翁 — 煙霧測試(零相依、不需瀏覽器;改自跨專案 skill「game-smoke-test」的可攜模板)
+// 路得記 — 煙霧測試(零相依、不需瀏覽器;改自跨專案 skill「game-smoke-test」的可攜模板)
 //
 // 這支補的是 validate(內容)與 selfplay(規則)之外的三個缺口:
 //   1. 原始碼語法:src/ 下所有 .js/.mjs 都能被 node --check 解析(.jsx 交給 build)。
-//   2. 嵌入契約:src/minigames/jonah/ 是約拿引擎的純複製 copy(npm run sync:jonah),
-//      game.js 絕不可自己 import './ui.js'(ui 由外部注入)——契約破了同步就會壞。
+//   2. 嵌入契約:src/minigames/gleaning/ 是路得的簽名關引擎(2026-07-07 起 jonah 死碼已清,
+//      契約檢查改守 gleaning)——game.js 絕不可自己 import './ui.js'(ui/嵌入由外部注入)。
 //   3. PWA 離線就緒(--offline):build 後檢查 dist/ 真的能離線跑——無外部資產、
 //      manifest/圖示齊備、Workbox SW 的預快取清單涵蓋 app shell 且每個檔都存在。
 //
@@ -20,7 +20,7 @@ const CONFIG = {
   srcDir: 'src',
   syntaxExts: ['.js', '.mjs'], // .jsx 無法 node --check,由 vite build / CI 把關
   // 嵌入契約(見 CLAUDE.md「Embedded mini-games」與約拿 CLAUDE.md「嵌入契約」)
-  embedEngine: 'src/minigames/jonah/game.js',
+  embedEngine: 'src/minigames/gleaning/game.js',
   embedForbid: [/from\s+['"]\.\/ui\.js['"]/],
   embedMustInclude: ['onComplete', 'destroy', 'this.embed'],
   // PWA 離線(--offline)
@@ -69,9 +69,9 @@ function checkSyntax() {
   ok(`全部 ${files.length} 檔解析 OK`)
 }
 
-// ── 2. 嵌入契約(守住 sync:jonah)──────────────────────────────────────
+// ── 2. 嵌入契約(守住 gleaning 簽名關)──────────────────────────────────────
 function checkEmbedContract() {
-  section('2. 嵌入契約 (src/minigames/jonah/game.js)')
+  section('2. 嵌入契約 (src/minigames/gleaning/game.js)')
   let src
   try {
     src = readFileSync(join(root, CONFIG.embedEngine), 'utf8')
@@ -83,7 +83,7 @@ function checkEmbedContract() {
   for (const tok of CONFIG.embedMustInclude)
     check(src.includes(tok), `包含嵌入關鍵字「${tok}」`)
   // 複製進來的引擎模組 import 不可懸空(防 sync 漏檔)
-  const dir = join(root, 'src/minigames/jonah')
+  const dir = join(root, 'src/minigames/gleaning')
   let dangling = 0
   for (const f of walk(dir).filter((p) => extname(p) === '.js')) {
     const body = readFileSync(f, 'utf8')

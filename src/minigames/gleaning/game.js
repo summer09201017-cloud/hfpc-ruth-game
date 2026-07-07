@@ -4,6 +4,7 @@
 //        → win(日暮、裝滿一籃) / faint(體力歸零→歇一會兒→自動再起,不失敗)。
 import { VIEW, GROUND_Y, PLAYER, RUN, STAMINA, FAINT, WHEAT, BOAZ } from './config.js'
 import { CONTENT } from './content.js'
+import { initSpeech, speakScripture, stopSpeech } from '../../speak.js'
 import { Player } from './player.js'
 import { Spawner } from './spawner.js'
 import { Renderer } from './renderer.js'
@@ -40,6 +41,7 @@ export class Game {
 
   boot() {
     Audio.unlock()
+    initSpeech()
     this.input.attach(this.canvas)
     this.renderer.resize()
     this._onResize = () => this.renderer.resize()
@@ -265,6 +267,8 @@ export class Game {
     this.state = 'win'
     Audio.stopMusic()
     Audio.sfx('win')
+    // 朗讀鐵則:過關經文 speakScripture(mp3 優先;句子已烤進 scripts/tts-verses.json)。引號拿掉再唸。
+    speakScripture(CONTENT.win.line.replace(/[「」]/g, ''), { ref: CONTENT.win.ref })
   }
 
   // 結束(過關):回報給外層(只回一次)。
@@ -280,6 +284,7 @@ export class Game {
     this.stopped = true
     if (this._onResize) window.removeEventListener('resize', this._onResize)
     if (this.input && this.input.detach) this.input.detach()
+    stopSpeech()
     Audio.stopMusic()
     Audio.pauseAll()
   }
